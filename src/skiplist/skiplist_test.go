@@ -18,7 +18,7 @@ func Compare(l interface{}, r interface{}) int {
 func TestLink(t *testing.T) {
 	log.Println("test skiplist start")
 
-	sk := NewSkiplist(-1, 10, 4, Compare)
+	sk := NewSkiplist(10, 4, Compare)
 	sk.Insert(4)
 	sk.Insert(3)
 	sk.Insert(2)

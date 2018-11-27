@@ -3,7 +3,6 @@ package skiplist
 import (
 	"errors"
 	"fmt"
-	"math"
 	"math/rand"
 	"sync"
 )
@@ -14,7 +13,6 @@ type Skiplist struct {
 	maxLevel    int
 	head        *SkiplistNode
 	len         int64
-	cap         int64
 	step        int
 	locker      *sync.Mutex
 	compareFunc func(interface{}, interface{}) int
@@ -26,17 +24,12 @@ type SkiplistNode struct {
 	Right []*SkiplistNode // 0层-Level层 每层的右侧node
 }
 
-func NewSkiplist(cap int64, lev int, step int, compareFunc func(interface{}, interface{}) int) *Skiplist {
-	if cap <= 0 {
-		cap = math.MaxInt64
-	}
+func NewSkiplist(lev int, step int, compareFunc func(interface{}, interface{}) int) *Skiplist {
 	head := newNode(lev, nil)
-	fmt.Println(head)
 	return &Skiplist{
 		maxLevel:    lev,
 		head:        head,
 		len:         0,
-		cap:         cap,
 		step:        step,
 		locker:      new(sync.Mutex),
 		compareFunc: compareFunc,
