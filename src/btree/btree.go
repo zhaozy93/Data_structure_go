@@ -18,6 +18,48 @@ func NewBTree(step int, compareFunc func(interface{}, interface{}) int) *BTree {
 func (bt *BTree) SetRoot(n *Node) {
 	bt.root = n
 }
+func (bt *BTree) Search(val interface{}) bool {
+	return bt.root.Search(val)
+}
+func (bt *BTree) Insert(val interface{}) bool {
+	node := bt.root
+	for {
+		// 找元素本身有没有
+		for i := 0; i < len(node.value); i++ {
+			if bt.compareFunc(val, node.value[i]) == 0 {
+				return false
+			}
+		}
+		// 元素没有孩子 有没有找到就证明了没有找到
+		if node.child == nil || len(node.child) == 0 {
+			node.InsertValue(val)
+			return true
+		}
+		i := 0
+		for ; i < len(node.child); i++ {
+			before := bt.compareFunc(val, node.child[i].value[0])
+			// node
+			if before == 0 {
+				return false
+			}
+			if before == -1 {
+				break
+			}
+			after := bt.compareFunc(val, node.child[i].value[len(node.child[i].value)-1])
+			if after == 1 {
+				continue
+			}
+			if after == 0 {
+				return false
+			}
+			if after == -1 {
+				break
+			}
+		}
+		node = node.child[i]
+	}
+	return false
+}
 
 type Node struct {
 	bt     *BTree
@@ -117,6 +159,39 @@ func (n *Node) InsertValue(val interface{}) {
 		n.parent.AddChild(peer)
 		n.parent.InsertValue(val)
 	}
+}
+func (n *Node) Search(val interface{}) bool {
+	fmt.Println(val, ":", n.value)
+	// 找元素本身有没有
+	for i := 0; i < len(n.value); i++ {
+		if n.bt.compareFunc(val, n.value[i]) == 0 {
+			return true
+		}
+	}
+	// 元素没有孩子 有没有找到就证明了没有找到
+	if n.child == nil || len(n.child) == 0 {
+		fmt.Println(val, ":", n.value)
+		return false
+	}
+	for i := 0; i < len(n.child); i++ {
+		before := n.bt.compareFunc(val, n.child[i].value[0])
+		fmt.Println(before)
+		if before == 0 {
+			return true
+		}
+		if before == -1 {
+			return n.child[i].Search(val)
+		}
+		after := n.bt.compareFunc(val, n.child[i].value[len(n.child[i].value)-1])
+		fmt.Println(before, after)
+		if after == -1 {
+			return n.child[i].Search(val)
+		}
+		if after == 0 {
+			return true
+		}
+	}
+	return false
 }
 func (n *Node) Print(tag int, ftag int) {
 	fmt.Print("FTag: ", ftag, ". MyTag: ", tag, ". Value: ", n.value, "\n")

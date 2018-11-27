@@ -53,4 +53,6 @@ func TestLink(t *testing.T) {
 	fmt.Println("Print-------------------")
 	bt.root.Print(0, 0)
 	// root.InsertValue(0)
+	fmt.Println("Start Search-------------------")
+	fmt.Println(bt.Search(1))
 }
