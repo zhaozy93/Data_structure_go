@@ -1,5 +1,6 @@
 package code_07
 
+// 重构二叉树
 type Node struct {
 	Val    string
 	leftC  *Node
