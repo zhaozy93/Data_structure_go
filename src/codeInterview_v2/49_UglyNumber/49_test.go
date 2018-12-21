@@ -1,9 +1,10 @@
-package code_38
+package code_49
 
 import (
+	"log"
 	"testing"
 )
 
 func TestSort(t *testing.T) {
-	FindPlace(8)
+	log.Println(FindUglyNums(10))
 }
