@@ -1,19 +1,23 @@
 package tree
 
+// 不支持并发
+type Value interface {
+	Less(Value) int
+}
 type Node struct {
 	parent *Node
 	lchild *Node
 	rchild *Node
-	value  interface{}
+	value  Value
 }
 
-func NewBinaryNode(val interface{}) *Node {
+func NewBinaryNode(val Value) *Node {
 	return &Node{value: val}
 }
-func (n *Node) SetValue(val interface{}) {
+func (n *Node) SetValue(val Value) {
 	n.value = val
 }
-func (n *Node) GetValue() interface{} {
+func (n *Node) GetValue() Value {
 	return n.value
 }
 func (n *Node) SetParent(p *Node) {
@@ -67,11 +71,153 @@ func (n *Node) postTraversal(res *[]interface{}) {
 // 用Tree对node进行一次封装而已
 type Tree struct {
 	root *Node
+	len  int64
 }
 
-func NewBinaryTree(r *Node) *Tree {
-	return &Tree{r}
+func NewBinaryTree() *Tree {
+	return &Tree{}
 }
+
+func (t *Tree) Insert(val Value) bool {
+	if t.root == nil {
+		r := NewBinaryNode(val)
+		t.root = r
+		t.len++
+		return true
+	}
+	preNode := t.root
+	node := preNode
+	less := 0
+	for {
+		if node == nil {
+			break
+		}
+		preNode = node
+		less = node.GetValue().Less(val)
+		if less == 0 {
+			return false
+		}
+		if less < 0 {
+			node = node.GetRightChild()
+		} else {
+			node = node.GetLeftChild()
+		}
+		continue
+	}
+	if less < 0 {
+		preNode.SetRightChild(NewBinaryNode(val))
+		t.len++
+	} else {
+		preNode.SetLeftChild(NewBinaryNode(val))
+		t.len++
+	}
+	return false
+}
+
+func (t *Tree) Delete(val Value) bool {
+	node := t.root
+	less := 0
+	for {
+		if node == nil {
+			break
+		}
+		less = node.GetValue().Less(val)
+		if less == 0 {
+			break
+		}
+		if less < 0 {
+			node = node.GetRightChild()
+		}
+		node = node.GetLeftChild()
+		continue
+	}
+	if node != nil {
+		t.len--
+		parent := node.GetParent()
+		left := node.GetLeftChild()
+		right := node.GetRightChild()
+		if left == nil && right == nil {
+			if parent.GetLeftChild() == node {
+				parent.SetLeftChild(nil)
+			} else {
+				parent.SetRightChild(nil)
+			}
+			node.SetParent(nil)
+			return true
+		}
+		if left == nil {
+			node.GetRightChild().SetParent(parent)
+			if parent.GetLeftChild() == node {
+				parent.SetLeftChild(node.GetRightChild())
+			} else {
+				parent.SetRightChild(node.GetRightChild())
+			}
+			node.SetParent(nil)
+			node.SetRightChild(nil)
+			node.SetRightChild(nil)
+			return true
+		}
+		if right == nil {
+			node.GetLeftChild().SetParent(parent)
+			if parent.GetLeftChild() == node {
+				parent.SetLeftChild(node.GetLeftChild())
+			} else {
+				parent.SetRightChild(node.GetLeftChild())
+			}
+			node.SetParent(nil)
+			node.SetRightChild(nil)
+			node.SetRightChild(nil)
+			return true
+		}
+		// 寻找左子树 最大的节点， 然后顶替当前节点的位置
+		for {
+			right := left.GetRightChild()
+			if right == nil {
+				break
+			}
+			left = right
+		}
+		left = left.GetRightChild()
+		if left.GetLeftChild() != nil {
+			left.GetLeftChild().SetParent(left.GetParent())
+			left.GetParent().SetRightChild(left.GetLeftChild())
+		}
+		if parent.GetLeftChild() == node {
+			parent.SetLeftChild(left)
+		} else {
+			parent.SetRightChild(left)
+		}
+		left.SetParent(parent)
+		left.SetLeftChild(node.GetLeftChild())
+		left.SetRightChild(node.GetRightChild())
+		node.SetParent(nil)
+		node.SetRightChild(nil)
+		node.SetRightChild(nil)
+		return true
+	}
+	return false
+}
+
+func (t *Tree) Find(val Value) *Node {
+	node := t.root
+	less := 0
+	for {
+		if node == nil {
+			break
+		}
+		less = node.GetValue().Less(val)
+		if less == 0 {
+			return node
+		}
+		if less < 0 {
+			node = node.GetRightChild()
+		}
+		node = node.GetLeftChild()
+		continue
+	}
+	return nil
+}
+
 func (t *Tree) PreTraversal() []interface{} {
 	if t.root != nil {
 		result := make([]interface{}, 0)
