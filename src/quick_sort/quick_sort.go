@@ -43,3 +43,26 @@ func quicksort(in []int, p, r int) {
 	quicksort(in, p, s-1)
 	quicksort(in, s+1, r)
 }
+
+// 方法二 推荐方法
+func QuickSort2(nums []int, start, end int) {
+	fmt.Println(start, end)
+	if start >= end {
+		return
+	}
+	midValue, i := nums[start], start+1
+	idx1, idx2 := start, end
+	for i <= end {
+		fmt.Println(start, end, i, nums)
+		if nums[i] > midValue {
+			nums[i], nums[end] = nums[end], nums[i]
+			end--
+		} else {
+			nums[i], nums[start] = nums[start], nums[i]
+			i++
+			start++
+		}
+	}
+	QuickSort2(nums, idx1, start-1)
+	QuickSort2(nums, start+1, idx2)
+}
