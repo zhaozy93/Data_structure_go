@@ -73,7 +73,10 @@ func getNext(sub string) []int {
 }
 
 // 更容易理解的KMP
-func Kmp(s, p string) int {
+func strStr(s string, p string) int {
+	if len(p) == 0 {
+		return 0
+	} 
 	pp := make([]int, len(p))
 	pp[0] = 0
 	for i := 1; i < len(p); i++ {
@@ -87,7 +90,7 @@ func Kmp(s, p string) int {
 					pp[i] = 0
 					break
 				}
-				j = pp[j]
+				j = pp[j-1]
 			}
 		}
 	}
@@ -98,11 +101,11 @@ func Kmp(s, p string) int {
 			i++
 			j++
 		} else {
-			if pp[j] == 0 {
+			if j == 0 { 
 				i++
 				continue
 			}
-			j = pp[j] - 1
+			j = pp[j-1]
 		}
 	}
 	if j == len(p) {
